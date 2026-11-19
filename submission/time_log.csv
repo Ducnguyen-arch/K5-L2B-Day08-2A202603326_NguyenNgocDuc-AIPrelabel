@@ -1,5 +1,5 @@
 step,images,minutes,note
-gold_manual,img_001,15,Kh�ng c�
-gold_manual,img_012,5,Ch? label ng??i ng?i trong xe nh?ng ph?i nh�n r�
-gold_manual,img_020,8,Kh�ng label ng??i ng?i l�i xe khi nh�n qua cabin/k�nh l�i - Ch?a c� guideline n�i r�.
-gold_manual,img_036,10,"Nh?ng v?t th? nh? ng??i v� motorbycle ph�a xa b? m?, kh�ng nh�n r� ???ng bao."
+gold_manual,img_001,15,Không có
+gold_manual,img_012,5,Chỉ label người ngồi trong xe nhưng phải nhìn rõ
+gold_manual,img_020,8,Không label người ngồi lái xe khi nhìn qua cabin/kính lái - Chưa có guideline nói rõ.
+gold_manual,img_036,10,"Những vật thể nhỏ người và motorbycle phía xa bị mờ, không nhìn rõ đường bao."

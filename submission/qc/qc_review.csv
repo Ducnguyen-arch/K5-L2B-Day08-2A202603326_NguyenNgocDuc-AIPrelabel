@@ -1,0 +1,11 @@
+image,object_id,error_type,reviewer,note
+img_003.jpg,16,thua,NguyenNgocDuc,"Box three_wheeler thứ hai trên cùng xe ba gác: #10 đã bao cả xe + mui, #16 chỉ bao thùng xe -> trùng, phải xoá"
+img_003.jpg,,bo_sot,NguyenNgocDuc,"Xe máy đỗ trước cửa hàng sau người #6, khoảng [685,245,75,100], nhìn rõ, cao > 20 px, không có box"
+img_003.jpg,,bo_sot,NguyenNgocDuc,"Xe đạp người #9 đang dắt, khoảng [545,250,40,70], thấy bánh và giỏ, không có box"
+img_006.jpg,,bo_sot,NguyenNgocDuc,"Hàng xe máy đỗ phía sau #67: xe thứ nhất khoảng [440,400,45,110], cao > 20 px, nên gán từng xe (CAL-04)"
+img_006.jpg,,bo_sot,NguyenNgocDuc,"Hàng xe máy đỗ phía sau #67: xe thứ hai khoảng [470,410,45,100], cao > 20 px, không có box"
+img_014.jpg,127,thua,NguyenNgocDuc,"three_wheeler trên gánh hàng (quang gánh, nồi) của người #126: không phải xe, không thuộc lớp nào -> xoá"
+img_031.jpg,382,sai_lop,NguyenNgocDuc,"Người phụ nữ đội nón dắt xe bị gán bicycle, đúng là person (bẫy wrong_class lọt khi review)"
+img_031.jpg,383,sai_vi_tri_kich_thuoc,NguyenNgocDuc,"Box bicycle chỉ bao nửa sau xe (từ x~594), thiếu bánh trước ở x~245-500; box đúng khoảng [245,340,575,340]"
+img_035.jpg,444,sai_vi_tri_kich_thuoc,NguyenNgocDuc,"Xích lô đỏ: box chỉ bao phần mui / người đạp (y 428-462), thiếu thân xe và bánh tới y~535"
+img_035.jpg,,bo_sot,NguyenNgocDuc,"Xe máy đỗ sau #430, khoảng [688,472,35,55], nhìn rõ, không có box"

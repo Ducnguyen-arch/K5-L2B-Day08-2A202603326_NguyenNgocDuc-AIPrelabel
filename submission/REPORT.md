@@ -55,11 +55,10 @@
 | deleted | 1 | 0.2% | 429 box máy |
 | added | 3 | 0.7% | 410 đối tượng sau duyệt |
 
-Nguồn: `qc/review_stats.md`. Có 24 ảnh batch; IoU ≥ 0.9 với box sau duyệt thì tính là accepted. Đã **loại 27 đối tượng quanh vùng bẫy** khỏi bảng này. Bẫy là lỗi do script cố ý cài vào, không phải lỗi của máy, nên nếu tính vào thì profile sẽ đổ lỗi cho máy về những gì máy không làm. Không có trường hợp đổi lớp nào (`class_changed_info = 0`), nên số vật máy sót thật ≈ added = 3.
+Nguồn: `qc/review_stats.md`. Có 24 ảnh batch; IoU ≥ 0.9 với box sau duyệt thì tính là accepted. Đã **loại 27 đối tượng quanh vùng bẫy** khỏi bảng này. Bẫy là lỗi do script cố ý cài vào, không phải lỗi của máy
 
-- **Lớp máy tệ nhất là `three_wheeler`.** Máy ra 19 box cho lớp này (16 accepted + 2 edited + 1 deleted). Có 3/19 = 15.8% box phải sửa hoặc xoá, và mình vẽ thêm 3 box, trên tổng 21 đối tượng `three_wheeler` sau duyệt (14.3%). Các lớp còn lại gần như không phải sửa: person 1/234, motorbike 1/89, car 0/49. Lý do: YOLO26 không có lớp này, chỉ YOLOE nhận ra, mà YOLOE cho điểm thấp trên tuk-tuk (ví dụ `img_012`: 0.19–0.30, xem mục 1), nên bị cắt ở `--conf 0.3`. Lớp `bus` cũng phải sửa 1/3 box, nhưng chỉ có 3 box nên không kết luận được.
+- **Lớp máy tệ nhất là `three_wheeler`.** Máy ra 19 box cho lớp này (16 accepted + 2 edited + 1 deleted). Có 3/19 = 15.8% box phải sửa hoặc xoá, và mình vẽ thêm 3 box, trên tổng 21 đối tượng `three_wheeler` sau duyệt. Các lớp còn lại gần như không phải sửa: person 1/234, motorbike 1/89, car 0/49. Lý do: YOLO26 không có lớp này, chỉ YOLOE nhận ra, mà YOLOE cho điểm thấp trên tuk-tuk (ví dụ `img_012`: 0.19–0.30, xem mục 1), nên bị cắt ở `--conf 0.3`. Lớp `bus` cũng phải sửa 1/3 box
 - **So với gold** (`qc/review_stats.md` mục 2, mẫu số là **61 đối tượng gold** trên 4 ảnh): precision của máy là **40/57 = 70.2%** (KTC 95%: 57–80%), recall là **40/61 = 65.6%** (KTC 95%: 53–76%). Tức là trên ảnh gold máy sót 21/61 vật và có 17 box thừa. Con số này còn là **lạc quan**, vì ngưỡng được chọn trên chính 4 ảnh này (mục 1).
-- **Mâu thuẫn quan trọng:** trên gold máy sót khoảng 1/3 số vật, nhưng trên batch mình chỉ vẽ thêm 3/410 (0.7%) và chỉ xoá 1/429 box. Không có lý do gì máy lại tốt hơn hẳn trên batch, vì batch còn có nhiều ảnh dày xe máy,  accepted 93.7% **không** có nghĩa là máy tốt 93.7%.
 
 ## 3. Thiên kiến tự động hóa và ảnh bẫy
 
@@ -119,26 +118,66 @@ Nguồn: `qc/review_stats.md`. Có 24 ảnh batch; IoU ≥ 0.9 với box sau duy
 
 ## 6. Calibration (Part 6)
 
-- Số quyết định: <<>> (`calibration_decisions.csv`); quan trọng nhất (dẫn `CAL-xx`): <<>>
-- Quy tắc mới đã vào `guideline_v1.1_calibrated.md`: <<>>
-- Nguyên nhân gốc: <<guideline mơ hồ / chưa nắm quy tắc / máy>>
+- **Số quyết định: 11** (`qc/calibration_decisions.csv`): 6 `cau_hoi_mo`, 3 `loi_may`, 1 `bay_lot`, 1 `can_review`. **9/11** ca được đưa vào v1.1. 2/11 ca (CAL-09, CAL-10) cố ý **không** đổi guideline, vì guideline đã rõ, lỗi là do máy hoặc do mình.
+- **Quan trọng nhất là CAL-07** (`img_012`): tuk-tuk có mui bị YOLO26 gọi là `car` với điểm 0.68–0.81. `three_wheeler` là lớp tệ nhất trên batch (3/19 box máy phải sửa hoặc xoá, vẽ thêm 3/21), và vẫn còn lỗi ở QC (box xích lô lệch ở `img_035`, box thừa trên gánh hàng ở `img_014`). Đây là lớp duy nhất model COCO không biết, nên quy tắc và bước kiểm cho lớp này có ảnh hưởng lớn nhất.
+- **Quy tắc mới đã vào `guideline_v1.1_calibrated.md`:**
+  - Chốt câu hỏi mở 2 (`img_018`): xe cao ≥ 20 px gán từng chiếc; chỉ cụm ≥ 5 xe cao < 20 px mới dùng **một** `ignore_region`.
+  - Chốt câu hỏi mở 3 (`img_003`): hàng nằm trong thùng thuộc box và mask xe, hàng nhô ra quá 20% chiều dài xe thì không.
+  - Chốt câu hỏi mở 4 (`img_012`): gán `person` khi thấy rõ đầu hoặc thân trên.
+  - Chốt câu hỏi mở 5 (`img_020`): kính thuộc xe; người chỉ thấy qua kính thì không gán.
+  - Chốt câu hỏi mở 6 (`img_026`): ảnh đêm không gộp box tự động, mỗi xe một box.
+  - Chốt câu hỏi mở 7 (`img_001`): không đặt mức `conf` để tự chấp nhận box máy.
+  - Thêm: xe ba bánh có mui luôn là `three_wheeler` (CAL-07).
+  - Thêm: mask xe không gồm người và bỏ khoảng hở lớn (CAL-08).
+  - Làm rõ: `can_review` chỉ dùng khi không chắc quy tắc (CAL-11).
+  - Câu hỏi mở 1 (xe đạp điện) **chưa chốt**, vì không có ảnh ví dụ.
+- **Nguyên nhân gốc:**
+  - **Guideline mơ hồ:** 6/11 ca, tức các câu hỏi mở. Hai trong số đó mình đã gặp ngay khi gán gold (ghi chú `time_log` của `img_012` và `img_020`).
+  - **Máy:** 3/11 ca (tuk-tuk → `car`, nhầm car/truck/bus, mask dính người).
+  - **Mình chưa nắm hoặc chưa làm đúng quy tắc:** 2/11 ca, gồm `can_review` dùng sai ở `img_036` và bẫy người bị gán `bicycle` lọt ở `img_004` / `img_031`.
+  - Ngoài ra, nguyên nhân lớn nhất của chất lượng lô thấp **không phải guideline** mà là **cách duyệt**: bắt bẫy 3/12, QC có 5/10 lỗi là bỏ sót (mục 3 và mục 7).
 
 ## 7. QC và quyết định (Part 6)
 
-- Mẫu: <<n>> ảnh (<<m>> ảnh `can_review` + <<k>> ngẫu nhiên, seed 42); người kiểm: bạn (**hạn chế**: bạn vừa là người duyệt).
-- Lỗi theo **đối tượng**: <<.../... = ...%>> · theo **ảnh**: <<.../... = ...%>> (ngưỡng Release ≤ 2%)
-- Top lỗi (trong: bỏ sót, thừa, sai lớp, sai vị trí/kích thước, sai thuộc tính, sai mask) + một ảnh ví dụ mỗi loại: <<>>
-- **Giới hạn mẫu nhỏ** (cận trên 95% trong `qc_report_auto.md`): <<>>
-- Script kiểm được / không kiểm được (ví dụ ôm sát, cùng bỏ sót với máy, theo checklist thật): <<>>
+- **Mẫu: 5 ảnh** (0 ảnh `can_review` + 5 ngẫu nhiên, seed 42; `qc_sample.py --n 5`): `img_003`, `img_006`, `img_014`, `img_031`, `img_035`, tổng **93 đối tượng**. Batch không có box `can_review` nào nên cả mẫu là ngẫu nhiên. Người kiểm là mình (**hạn chế**: mình vừa là người duyệt lô, nên dễ bỏ sót đúng những lỗi đã bỏ sót lúc duyệt).
+- **Lỗi theo đối tượng: 10/93 = 10.8%** · **theo ảnh: 5/5 = 100%** (ngưỡng Release ≤ 2%). Không ảnh nào trong mẫu sạch.
+- **Top lỗi** (`qc/qc_review.csv`):
 
-**Quyết định: <<Release / Hold / Rework>>**, ngày <<YYYY-MM-DD>>. Lý do (đi theo Hold → Rework → Release): <<>>
-Nếu Rework / Hold, việc cần làm tiếp: <<>>
+  | Loại lỗi | Số | Tỉ lệ trong tổng lỗi | Ảnh ví dụ |
+  |---|---|---|---|
+  | bỏ sót (`bo_sot`) | 5 | 5/10 | `img_006`: 2 xe máy đỗ phía sau #67, cao > 20 px, không có box |
+  | thừa (`thua`) | 2 | 2/10 | `img_014` #127: box `three_wheeler` nằm trên gánh hàng, không phải xe |
+  | sai vị trí / kích thước | 2 | 2/10 | `img_031` #383: box xe đạp thiếu bánh trước; `img_035` #444: box xích lô chỉ bao phần mui |
+  | sai lớp (`sai_lop`) | 1 | 1/10 | `img_031` #382: người dắt xe bị gán `bicycle` (chính là bẫy wrong_class đã lọt) |
+  | sai thuộc tính / sai mask | 0 | 0/10 | — (QC chỉ kiểm box) |
+
+  Bỏ sót chiếm 5/10 lỗi, và `qc_report_auto.md` đánh dấu đây là **lỗi hệ thống**. 
+- **Giới hạn mẫu nhỏ:** 5/5 ảnh lỗi, cận trên 95% (Wilson) của tỉ lệ ảnh lỗi thật là **100%**. Chỉ 5 ảnh thì **không thể chứng minh** lô đạt ngưỡng 2%
+- **Script kiểm được / không kiểm được:**
+  - **Kiểm được:** đếm và tính tỉ lệ từ phiếu `qc_review.csv`, tính cận trên thống kê, nhận ra loại lỗi lặp lại, và áp ngưỡng của `taxonomy.json` vào cây quyết định.
+  - **Không kiểm được:**
+    - Box có ôm sát thật không, và vật bị **cả máy lẫn mình cùng bỏ sót**: script chỉ đếm những gì người kiểm ghi vào phiếu.
+    - Mình có thật sự làm theo checklist khi duyệt không.
+    - Lỗi trong 19/24 ảnh **không** nằm trong mẫu. Ví dụ, `img_018` vẫn còn 16 `ignore_region` nhỏ trái với CAL-04 mà không bị đếm.
+
+**Quyết định: Rework**, ngày 2026-11-19. Lý do: không phải Hold (guideline đã chốt 6/7 câu hỏi mở trong v1.1, dữ liệu không hỏng), nhưng lỗi ảnh 5/5 = 100% vượt xa ngưỡng 2%, bỏ sót lặp lại (5/10 lỗi) và bắt bẫy chỉ 3/12, nên phải Rework, chưa được Release.
 
 ## 8. Ghi chú cá nhân
 
-- **Dùng AI để làm bài** (công cụ nào, việc gì, kiểm tra thế nào; "không dùng" nếu không): <<>>
-- Gold có bị nhiễm không (bạn có nhìn pre-label hay hỏi AI trước khi gán xong)? <<không / có, như sau: ...>>
-- Máy / GPU / CVAT dùng; vướng mắc cài đặt: <<>>
-- Dùng cache `data/cache/` thay vì tự chạy? <<không / có, vì ...>>
-- Lỗi / bug script đã gặp (nếu có): <<>>
-- Một điều bạn làm khác lần sau: <<>>
+- **Dùng AI để làm bài:** có, dùng **Claude Code** (trợ lý AI trong terminal) **sau khi** đã gán gold và review batch xong. Việc AI làm:
+  - Đọc repo và chạy `check_submission.py` để liệt kê phần còn thiếu.
+  - Viết script phụ đối chiếu dự đoán YOLO26 / YOLOE với gold (số liệu điểm cao mà sai / điểm thấp mà đúng ở mục 1).
+  - Soạn nháp REPORT mục 1–7, `calibration_decisions.csv` và `guideline_v1.1_calibrated.md`.
+
+  Cách  kiểm tra:
+  - Mở lại từng ảnh trong `work/qc/review/` và `masks/` để xác nhận lỗi.
+  - Chạy lại `qc_report.py` và `check_submission.py`.
+
+  AI **không** gán nhãn gold và không review batch thay mình.
+- **Gold có bị nhiễm không:** không. `gold_manual.json` được lưu lúc 2026-11-17 18:00, **trước** lần chạy model đầu tiên (`t_y26`, 2026-11-18 01:04)
+- **Máy:** Windows 10 Pro, chạy **CPU** (không có GPU CUDA). CVAT v2.81.0 chạy bằng Docker. Không có GPU nên chạy chậm: Grounding DINO mất ~116 s/ảnh (`r06`), SAM 2.1, không dùng SAM 3.
+- **Dùng cache `data/cache/` thay vì tự chạy?** Không. Tự chạy `y26_all` (`r08`) và `yoloe_all` (`r09`) trên CPU, xem `work/runs.csv`.
+- **Lỗi / quy trình đã gặp:**
+
+  - `time_log.csv` bị lưu bằng mã hoá Windows (không phải UTF-8) nên phần ghi chú tiếng Việt bị vỡ chữ; nội dung ghi chú gốc được dẫn lại ở mục 6.
+- **Một điều mình sẽ làm khác lần sau:** **quét ảnh và đếm vật trước khi bật nhãn máy**, cho từng ảnh. Accepted 402/429 đi cùng bắt bẫy 3/12 và 5/10 lỗi QC là bỏ sót.
