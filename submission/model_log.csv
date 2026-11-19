@@ -1,1 +1,7 @@
 run_id,part,model,params,split,n_boxes,sec_per_img,what_went_right,what_went_wrong,decision
+r01,,yolo26-m,--model yolo26 --size m --split pilot --conf 0.25 --out work/prelabel/t_y26,pilot,215,2.69,,,
+r02,,yolo26-m,model yolo26 --size m --split pilot --conf 0.5 --out work/prelabel/t_y26_c05,pilot,139,2.44,,,
+r04,,yoloe-s,--model yoloe --classes three_wheeler --images img_004.jpg img_013.jpg --conf 0.5 --out work/prelabel/t_ye,custom,6,1.56,,,
+r05,,yoloe-m,--model yoloe --size m --split pilot --conf 0.25 --out work/prelabel/t_ye_2,pilot,198,3.49,,,
+r06,,gdino,model gdino --size m --split pilot --conf 0.5 --out work/prelabel/t_gdino,pilot,80,116.08,,,
+,,sam3,,,,,,,skipped do chua co quyen
