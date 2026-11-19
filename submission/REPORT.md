@@ -101,10 +101,21 @@ Nguồn: `qc/review_stats.md`. Có 24 ảnh batch; IoU ≥ 0.9 với box sau duy
 
 | Ảnh | SAM (phiên bản) | Số click | Mask gồm người lái / hàng hoá? | Lỗi quan sát | File trong `masks/` |
 |---|---|---|---|---|---|
-| <<img_0xx>> | <<>> | <<>> | <<>> | <<>> | <<>> |
+| `img_003` (xe ba gác bán dưa hấu, có mui) | SAM 2.1 (`sam2.1_b.pt`) | 3 (2 dương: mui, thân thùng; 1 âm: nền bên phải) | **Hàng hoá: có.** Dưa hấu và rổ trong thùng nằm trong mask. **Người: một phần.** Mặt và vai em bé ngồi trên thùng bị tô vào mask; người lái phía sau gần như không bị tô | Mask dính vào người (em bé). Mui, thùng và 2 bánh lớn được tách khỏi nền khá sạch, bóng đổ trên đường không bị tô | `tuktuk_img003.jpg` |
+| `img_004` (tuk-tuk hồng đỗ trong hàng tuk-tuk) | SAM 2.1 (`sam2.1_b.pt`) | 3 (2 dương, 1 âm) | **Người lái: không.** Người đứng sau xe không bị tô | 1 click dương rơi vào **tán cây / biển phía sau**, không phải xe. Mask vẫn ra đúng tuk-tuk hồng nhờ click ở bánh trước, còn click âm (trên kính tuk-tuk xanh) giúp không dính sang xe bên cạnh. Viền mui và hông xe chưa sát tuyệt đối | `tuktuk_img004.jpg` |
+| `img_013` (tuk-tuk hồng chở khách, thành xe hở) | SAM 2.1 (`sam2.1_b.pt`) | 3 (2 dương: mui, thân xe; 1 âm: ngực người lái) | **Người lái: một phần.** Click âm chỉ bỏ được phần ngực, còn tay, chân, dép người lái vẫn bị tô | **Lỗ thủng lớn không bị bỏ.** Qua khung hở hai bên, SAM tô luôn cả nền phía sau: người mặc áo hồng, bàn, ghế, chai nước. Mask người lái lốm đốm | `tuktuk_img013.jpg` |
 
-- Đối chiếu guideline mục 4.2: quy tắc nào giúp, quy tắc nào thiếu? <<>>
-- *(Tuỳ chọn)* Interactor SAM trong CVAT: làm được / không (lỗi gì, đã thử gì); khác gì offline: <<>>
+- **Cách đặt click:** cả 3 ảnh dùng **cùng một bộ toạ độ** lấy từ lệnh mẫu trong GUIDE.md: dương `(600,110)`, `(400,480)`, âm `(720,300)`. Với `img_003` và `img_013` các điểm này tình cờ rơi đúng mui và thân xe. Với `img_004` một click dương rơi ra nền. Kết quả vẫn dùng được, nhưng là **may mắn chứ không phải do chọn click**. Lần sau phải chọn click theo từng vật: dương trên mui, thân và bánh; âm trên người lái và nền nhìn qua khung hở.
+- **Đối chiếu guideline mục 4.2:**
+  - **Có ích:**
+    - **4.2.3 (bóng đổ không thuộc vật):** dễ kiểm. `img_003` bóng trên đường không bị tô, đạt.
+    - **4.2.4 (hai vật chạm nhau, vùng chạm thuộc vật phía trước):** giúp quyết định đặt click âm lên tuk-tuk xanh ở `img_004`, để mask không tràn sang xe bên cạnh.
+  - **Bị vi phạm:**
+    - **4.2.2 (lỗ lớn phải bỏ khỏi polygon):** `img_013` vi phạm rõ. Khoảng hở hai bên thành xe lớn hơn nhiều so với 5% diện tích xe, nhưng SAM tô kín cả nền phía sau. Muốn sửa phải thêm click âm vào từng khoảng hở, hoặc sửa polygon bằng tay.
+  - **Còn thiếu:**
+    - **Người lái / hành khách có thuộc mask xe không.** Mục 4.1.4 nói với **box** thì người và xe là hai box riêng, nhưng 4.2 không nói gì cho **mask**. Theo tinh thần 4.1.4 thì mask `three_wheeler` **không** được gồm người, nên `img_003` (em bé) và `img_013` (người lái) đều sai. Cần ghi rõ trong v1.1.
+    - **Hàng hoá trong thùng (`img_003`).** Câu hỏi mở số 3 của v1.0 chưa chốt cho mask. Mình đề xuất: hàng **nằm trong** thùng thì tính vào mask xe, hàng **nhô ra** quá ~20% chiều dài xe thì không (giống 4.1.5 cho box). Ghi vào v1.1.
+
 
 ## 6. Calibration (Part 6)
 
